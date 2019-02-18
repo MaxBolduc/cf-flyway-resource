@@ -29,13 +29,13 @@ PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
 
-[[ ! -z "$PCF_API" ]]             && echo "PCF_API : $PCF_API"              || echo "'source.api' must be set to the PCF API endpoint!" >&3
-[[ ! -z "$PCF_ORG" ]]             && echo "PCF_ORG : $PCF_ORG"              || echo "'source.org' must be set to the organization for PCF deployment!" >&3
-[[ ! -z "$PCF_SPACE" ]]           && echo "PCF_SPACE : $PCF_SPACE"          || echo "'source.space' must be set to the space for PCF deployment!" >&3
-[[ ! -z "$PCF_USERNAME" ]]        && echo "PCF_USERNAME : $PCF_USERNAME"    || echo "'source.user' must be set to the username for PCF deployment!" >&3
-[[ ! -z "$PCF_PASSWORD" ]]        && echo "PCF_PASSWORD : **********"       || echo "'source.password' must be set to the password for PCF deployment!" >&3
-[[ ! -z "$PCF_SERVICE" ]]         && echo "PCF_SERVICE : $PCF_SERVICE"      || echo "'source.service' the database service instance name." >&3
-[[ ! -z "$LOCATIONS" ]]           && echo "LOCATIONS : $LOCATIONS"          || echo "'params.locations' Comma-separated list of locations to scan recursively for migrations." >&3
+[[ ! -z "$PCF_API" ]]             && echo "PCF_API : $PCF_API" || echo "'source.api' must be set to the PCF API endpoint!"
+[[ ! -z "$PCF_ORG" ]]             && echo "PCF_ORG : $PCF_ORG" || echo "'source.org' must be set to the organization for PCF deployment!"
+[[ ! -z "$PCF_SPACE" ]]           && echo "PCF_SPACE : $PCF_SPACE" || echo "'source.space' must be set to the space for PCF deployment!"
+[[ ! -z "$PCF_USERNAME" ]]        && echo "PCF_USERNAME : $PCF_USERNAME" || echo "'source.user' must be set to the username for PCF deployment!"
+[[ ! -z "$PCF_PASSWORD" ]]        && echo "PCF_PASSWORD : **********" || echo "'source.password' must be set to the password for PCF deployment!"
+[[ ! -z "$PCF_SERVICE" ]]         && echo "PCF_SERVICE : $PCF_SERVICE" || echo "'source.service' the database service instance name."
+[[ ! -z "$LOCATIONS" ]]           && echo "LOCATIONS : $LOCATIONS" || echo "'params.locations' Comma-separated list of locations to scan recursively for migrations."
 
 echo -e "${BOLD_GREEN}OK${RESET}\n"
 
