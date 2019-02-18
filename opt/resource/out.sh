@@ -45,7 +45,7 @@ FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 [[ ! -z "$PCF_SERVICE" ]]         && echo "PCF_SERVICE : $PCF_SERVICE" || echo "'source.service' the database service instance name."
 
 [[ ! -z "$LOCATIONS" ]]           && echo "LOCATIONS : $LOCATIONS" || echo "(Optional) 'params.locations' Comma-separated list of locations to scan recursively for migrations."
-[[ ! -z "$COMMANDS" ]]            && echo "COMMANDS : $COMMANDS" || echo "(Optional) 'params.commands' Comma-separated list of flyway commands to execute. (Default -> params.commands: [\"info\", \"migrate\", \"info\"]")
+[[ ! -z "$COMMANDS" ]]            && echo "COMMANDS : $COMMANDS" || echo "(Optional) 'params.commands' Comma-separated list of flyway commands to execute. (Default -> params.commands: [\"info\", \"migrate\", \"info\"])"
 [[ ! -z "$FLYWAY_CONF" ]]         && echo "FLYWAY_CONF : $FLYWAY_CONF" || echo "(Optional) 'params.flyway_conf' Either a path to a flyway.config file OR inline flyway.config content."
 
 
