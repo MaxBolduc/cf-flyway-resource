@@ -19,7 +19,7 @@ cd $DIR
 request=$(mktemp --tmpdir cf-flyway-resource-check.XXXXXX)
 cat > $request <&0
 
-jq '.params' < $request
+cat < $request | jq -r '.params'
 
 # --------------------------------
 
