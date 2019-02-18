@@ -33,7 +33,7 @@ PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
 # --------------------------------
 
 # login to cloud foundry
-# cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
+cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
 
 version=$(jq -r '.version.ref' < $request)
 
