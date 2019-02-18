@@ -29,9 +29,13 @@ PCF_SPACE=$(jq -r '.source.space // empty' < $request)
 PCF_USERNAME=$(jq -r '.source.username // empty' < $request)
 PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
+
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
 COMMANDS=$(jq -r '.params.commands // empty' < $request)
 FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
+
+[[ -z "$COMMANDS" ]]              && COMMANDS=$(jq -n '["info", "migrate", "info"]')
+[[ -f "$FLYWAY_CONF" ]]           && FLYWAY_CONF=$(cat $FLYWAY_CONF)
 
 [[ ! -z "$PCF_API" ]]             && echo "PCF_API : $PCF_API" || echo "'source.api' must be set to the PCF API endpoint!"
 [[ ! -z "$PCF_ORG" ]]             && echo "PCF_ORG : $PCF_ORG" || echo "'source.organization' must be set to the organization for PCF deployment!"
@@ -39,8 +43,11 @@ FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 [[ ! -z "$PCF_USERNAME" ]]        && echo "PCF_USERNAME : $PCF_USERNAME" || echo "'source.user' must be set to the username for PCF deployment!"
 [[ ! -z "$PCF_PASSWORD" ]]        && echo "PCF_PASSWORD : *************" || echo "'source.password' must be set to the password for PCF deployment!"
 [[ ! -z "$PCF_SERVICE" ]]         && echo "PCF_SERVICE : $PCF_SERVICE" || echo "'source.service' the database service instance name."
-[[ ! -z "$LOCATIONS" ]]           && echo "LOCATIONS : $LOCATIONS" || echo "'params.locations' Comma-separated list of locations to scan recursively for migrations."
-[[ ! -z "$COMMANDS" ]]            && echo "COMMANDS : $COMMANDS" || echo "'params.commands' Comma-separated list of flyway commands to execute."
+
+[[ ! -z "$LOCATIONS" ]]           && echo "LOCATIONS : $LOCATIONS" || echo "(Optional) 'params.locations' Comma-separated list of locations to scan recursively for migrations."
+[[ ! -z "$COMMANDS" ]]            && echo "COMMANDS : $COMMANDS" || echo "(Optional) 'params.commands' Comma-separated list of flyway commands to execute. (Default -> params.commands: [\"info\", \"migrate\", \"info\"]")
+[[ ! -z "$FLYWAY_CONF" ]]         && echo "FLYWAY_CONF : $FLYWAY_CONF" || echo "(Optional) 'params.flyway_conf' Either a path to a flyway.config file OR inline flyway.config content."
+
 
 # --------------------------------
 
@@ -69,8 +76,9 @@ cat >> flyway.conf <<- EOF
 flyway.url=$db_url
 flyway.user=$db_username
 flyway.password=$db_password
-flyway.locations=$LOCATIONS
 EOF
+
+[[ ! -z "$LOCATIONS" ]] && echo "flyway.locations=$LOCATIONS" >> flyway.conf
 
 # output flyway.conf (don't show password)
 cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/" 
