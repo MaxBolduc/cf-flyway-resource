@@ -7,15 +7,24 @@ fi
 
 # execute script from the test directory.
 TEST_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+TMP_DIR="${TEST_DIR}/../tmp"
 
 echo -e "\\nGiven_Out_When_NoOpt_Then_ReturnNewVersion"
 jq -n "
 {
     source: {
-        foo1: \"bar1\"
+        username: \"${CF_USERNAME}\",
+        password: \"${CF_PASSWORD}\",
+        api: \"${CF_API}\",
+        org: \"${CF_ORG}\",
+        space: \"${CF_SPACE}\",
+        service: \"${CF_SERVICE}\"
     },
     params: {
-        foo2: \"bar2\"
+        locations: \"filesystem:${TMP_DIR}/artifact/DB/\",
+    },
+    version: {
+        ref: \"2019-01-01 00:00:00.000 (utc)\"
     }
 }
-" | tee | $TEST_DIR/../opt/resource/out.sh
+" | tee | $TEST_DIR/../opt/resource/out.sh ${TMP_DIR}/destination

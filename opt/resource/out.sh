@@ -7,6 +7,84 @@ set -e
 exec 3>&1 # make stdout available as fd 3 for the result
 exec 1>&2 # redirect all output to stderr for logging
 
+# --------------------------------
+
+BOLD_GREEN="\e[32;1m"
+BOLD_CYAN="\e[36;1m"
+RESET="\e[0m"
+
+DIR=${1-$(pwd)}
+cd $DIR
+
+request=$(mktemp --tmpdir cf-flyway-resource-check.XXXXXX)
+cat > $request <&0
+
+# --------------------------------
+
+PCF_API=$(jq -r '.source.api // empty' < $request)
+PCF_ORG=$(jq -r '.source.org // empty' < $request)
+PCF_SPACE=$(jq -r '.source.space // empty' < $request)
+PCF_USERNAME=$(jq -r '.source.username // empty' < $request)
+PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
+PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
+LOCATIONS=$(jq -r '.params.locations // empty' < $request)
+
+[[ ! -z "$PCF_API" ]]             && echo "PCF_API : $PCF_API"              || echo "'source.api' must be set to the PCF API endpoint!" >&3
+[[ ! -z "$PCF_ORG" ]]             && echo "PCF_ORG : $PCF_ORG"              || echo "'source.org' must be set to the organization for PCF deployment!" >&3
+[[ ! -z "$PCF_SPACE" ]]           && echo "PCF_SPACE : $PCF_SPACE"          || echo "'source.space' must be set to the space for PCF deployment!" >&3
+[[ ! -z "$PCF_USERNAME" ]]        && echo "PCF_USERNAME : $PCF_USERNAME"    || echo "'source.user' must be set to the username for PCF deployment!" >&3
+[[ ! -z "$PCF_PASSWORD" ]]        && echo "PCF_PASSWORD : **********"       || echo "'source.password' must be set to the password for PCF deployment!" >&3
+[[ ! -z "$PCF_SERVICE" ]]         && echo "PCF_SERVICE : $PCF_SERVICE"      || echo "'source.service' the database service instance name." >&3
+[[ ! -z "$LOCATIONS" ]]           && echo "LOCATIONS : $LOCATIONS"          || echo "'params.locations' Comma-separated list of locations to scan recursively for migrations." >&3
+
+echo -e "${BOLD_GREEN}OK${RESET}\n"
+
+# --------------------------------
+
+# login to cloud foundry
+cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
+echo -e '\n'
+
+# create service key if not exist
+cf create-service-key $PCF_SERVICE cf-flyway
+echo -e '\n'
+
+# create flyway.conf
+echo -e "Creating flyway configuration file for service instance ${BOLD_CYAN}${PCF_SERVICE}${RESET} using credentials from service key ${BOLD_CYAN}cf-flyway${RESET}..."
+echo -e "Reference: ${BOLD_CYAN}https://flywaydb.org/documentation/configfiles${RESET}\n"
+
+# obtain service key credentials
+credentials=`echo $(cf service-key $PCF_SERVICE cf-flyway) | tee | sed "s/.*{/{/"`
+
+db_url="jdbc:postgresql://"$(echo $credentials | jq -r '.uri // empty' | grep -Poh '(?<=@).*')
+db_username=$(echo $credentials | jq -r '.username')
+db_password=$(echo $credentials | jq -r '.password')
+
+cat > flyway.conf <<- EOF
+flyway.url=$db_url
+flyway.user=$db_username
+flyway.password=$db_password
+flyway.locations=$LOCATIONS
+EOF
+
+# output flyway.conf (don't show password)
+cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/" 
+echo -e "${BOLD_GREEN}OK${RESET}\n"
+
+# print info before migration
+flyway info
+echo -e "${BOLD_GREEN}OK${RESET}\n"
+
+# execute migration
+flyway migrate
+echo -e "${BOLD_GREEN}OK${RESET}\n"
+
+# print info after migration
+flyway info
+echo -e "${BOLD_GREEN}OK${RESET}\n"
+
+# --------------------------------
+
 OUT=$(date -u +"%F %T.%3N (utc)")
 
 echo $OUT | jq -R . | jq -r '{version:{ref: .}}' >&3
