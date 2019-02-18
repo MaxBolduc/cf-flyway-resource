@@ -11,6 +11,14 @@ TEST_DIR=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 echo -e "\\nGiven_In_When_NoOpt_Then_ReturnVersion"
 jq -n "
 {
+    source: {
+        username: \"${CF_USERNAME}\",
+        password: \"${CF_PASSWORD}\",
+        api: \"${CF_API}\",
+        organization: \"${CF_ORG}\",
+        space: \"${CF_SPACE}\",
+        service: \"${CF_SERVICE}\"
+    },
     version: {
         ref: \"2019-01-01 00:00:00.000 (utc)\"
     }

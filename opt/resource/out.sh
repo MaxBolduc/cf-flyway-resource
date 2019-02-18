@@ -19,7 +19,7 @@ cd $DIR
 request=$(mktemp --tmpdir cf-flyway-resource-check.XXXXXX)
 cat > $request <&0
 
-cat < $request | jq -r '.params'
+cat < $request | jq -r . | sed "s/\"password\":.*/\"password\": \"********************\"/" 
 
 # --------------------------------
 
@@ -92,6 +92,24 @@ echo -e "${BOLD_GREEN}OK${RESET}\n"
 
 # --------------------------------
 
-OUT=$(date -u +"%F %T.%3N (utc)")
+version=$(date -u +"%F %T.%3N (utc)")
 
-echo $OUT | jq -R . | jq -r '{version:{ref: .}}' >&3
+service_guid=$(cf service $PCF_SERVICE --guid)
+
+metadata=$(cf curl /v2/service_instances/$service_guid | jq .metadata)
+
+output=$(echo $metadata | jq -r "
+{
+    version: {
+        ref: \"$version\"
+    },
+    metadata: [
+        {name: \"guid\", value: .guid},
+        {name: \"url\", value: .url},
+        {name: \"created_at\", value: .created_at},
+        {name: \"updated_at\", value: .updated_at}
+    ]
+}")
+
+# emit output to stdout for the result
+echo $output | jq . >&3
