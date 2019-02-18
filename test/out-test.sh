@@ -50,6 +50,7 @@ jq -n "
 }
 " | tee | $TEST_DIR/../opt/resource/out.sh ${TMP_DIR}/destination
 
+
 echo -e "\\nGiven_Out_When_ParamsLocations_Then_ReturnNewVersion"
 jq -n "
 {
@@ -63,6 +64,34 @@ jq -n "
     },
     params: {
         locations: \"filesystem:${TMP_DIR}/artifact/DB/\",
+    },
+    version: {
+        ref: \"2019-01-01 00:00:00.000 (utc)\"
+    }
+}
+" | tee | $TEST_DIR/../opt/resource/out.sh ${TMP_DIR}/destination
+
+echo -e "\\nGiven_Out_When_ParamsCommands_Then_ExecuteCommands_And_ReturnNewVersion"
+jq -n "
+{
+    source: {
+        username: \"${CF_USERNAME}\",
+        password: \"${CF_PASSWORD}\",
+        api: \"${CF_API}\",
+        organization: \"${CF_ORG}\",
+        space: \"${CF_SPACE}\",
+        service: \"${CF_SERVICE}\"
+    },
+    params: {
+        commands: [
+            \"info\",
+            \"clean\",
+            \"info\",
+            \"migrate\",
+            \"info\"
+        ],
+        locations: \"filesystem:${TMP_DIR}/artifact/DB/\",
+        flyway_conf: \"\nflyway.schemas=dbo\n\"
     },
     version: {
         ref: \"2019-01-01 00:00:00.000 (utc)\"

@@ -84,15 +84,11 @@ EOF
 cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/" 
 echo -e "${BOLD_GREEN}OK${RESET}\n"
 
-# print info before migration
-flyway info
-
-# execute migration
-flyway migrate
+# execute flyway commands
+echo $COMMANDS | jq -cr '.[]' | while read cmd; do
+    flyway $cmd
+done
 echo -e "${BOLD_GREEN}OK${RESET}\n"
-
-# print info after migration
-flyway info
 
 # --------------------------------
 
