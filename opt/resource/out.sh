@@ -22,18 +22,19 @@ cat > $request <&0
 # --------------------------------
 
 PCF_API=$(jq -r '.source.api // empty' < $request)
-PCF_ORG=$(jq -r '.source.org // empty' < $request)
+PCF_ORG=$(jq -r '.source.organization // empty' < $request)
 PCF_SPACE=$(jq -r '.source.space // empty' < $request)
 PCF_USERNAME=$(jq -r '.source.username // empty' < $request)
 PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
+FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
 [[ ! -z "$PCF_API" ]]             && echo "PCF_API : $PCF_API" || echo "'source.api' must be set to the PCF API endpoint!"
-[[ ! -z "$PCF_ORG" ]]             && echo "PCF_ORG : $PCF_ORG" || echo "'source.org' must be set to the organization for PCF deployment!"
+[[ ! -z "$PCF_ORG" ]]             && echo "PCF_ORG : $PCF_ORG" || echo "'source.organization' must be set to the organization for PCF deployment!"
 [[ ! -z "$PCF_SPACE" ]]           && echo "PCF_SPACE : $PCF_SPACE" || echo "'source.space' must be set to the space for PCF deployment!"
 [[ ! -z "$PCF_USERNAME" ]]        && echo "PCF_USERNAME : $PCF_USERNAME" || echo "'source.user' must be set to the username for PCF deployment!"
-[[ ! -z "$PCF_PASSWORD" ]]        && echo "PCF_PASSWORD : **********" || echo "'source.password' must be set to the password for PCF deployment!"
+[[ ! -z "$PCF_PASSWORD" ]]        && echo "PCF_PASSWORD : *************" || echo "'source.password' must be set to the password for PCF deployment!"
 [[ ! -z "$PCF_SERVICE" ]]         && echo "PCF_SERVICE : $PCF_SERVICE" || echo "'source.service' the database service instance name."
 [[ ! -z "$LOCATIONS" ]]           && echo "LOCATIONS : $LOCATIONS" || echo "'params.locations' Comma-separated list of locations to scan recursively for migrations."
 
@@ -60,7 +61,9 @@ db_url="jdbc:postgresql://"$(echo $credentials | jq -r '.uri // empty' | grep -P
 db_username=$(echo $credentials | jq -r '.username')
 db_password=$(echo $credentials | jq -r '.password')
 
-cat > flyway.conf <<- EOF
+echo "$FLYWAY_CONF" > flyway.conf 
+
+cat >> flyway.conf <<- EOF
 flyway.url=$db_url
 flyway.user=$db_username
 flyway.password=$db_password
@@ -73,7 +76,6 @@ echo -e "${BOLD_GREEN}OK${RESET}\n"
 
 # print info before migration
 flyway info
-echo -e "${BOLD_GREEN}OK${RESET}\n"
 
 # execute migration
 flyway migrate
@@ -81,7 +83,6 @@ echo -e "${BOLD_GREEN}OK${RESET}\n"
 
 # print info after migration
 flyway info
-echo -e "${BOLD_GREEN}OK${RESET}\n"
 
 # --------------------------------
 

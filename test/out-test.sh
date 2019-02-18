@@ -16,12 +16,13 @@ jq -n "
         username: \"${CF_USERNAME}\",
         password: \"${CF_PASSWORD}\",
         api: \"${CF_API}\",
-        org: \"${CF_ORG}\",
+        organization: \"${CF_ORG}\",
         space: \"${CF_SPACE}\",
         service: \"${CF_SERVICE}\"
     },
     params: {
         locations: \"filesystem:${TMP_DIR}/artifact/DB/\",
+        flyway_conf: \"flyway.schemas=abp_microservice\nflyway.locations=filesystem:${TMP_DIR}/artifact/DB/\n\"
     },
     version: {
         ref: \"2019-01-01 00:00:00.000 (utc)\"
