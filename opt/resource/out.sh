@@ -19,6 +19,8 @@ cd $DIR
 request=$(mktemp --tmpdir cf-flyway-resource-check.XXXXXX)
 cat > $request <&0
 
+jq '.params' < $request
+
 # --------------------------------
 
 PCF_API=$(jq -r '.source.api // empty' < $request)
@@ -28,6 +30,7 @@ PCF_USERNAME=$(jq -r '.source.username // empty' < $request)
 PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
+COMMANDS=$(jq -r '.params.commands // empty' < $request)
 FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
 [[ ! -z "$PCF_API" ]]             && echo "PCF_API : $PCF_API" || echo "'source.api' must be set to the PCF API endpoint!"
@@ -37,8 +40,7 @@ FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 [[ ! -z "$PCF_PASSWORD" ]]        && echo "PCF_PASSWORD : *************" || echo "'source.password' must be set to the password for PCF deployment!"
 [[ ! -z "$PCF_SERVICE" ]]         && echo "PCF_SERVICE : $PCF_SERVICE" || echo "'source.service' the database service instance name."
 [[ ! -z "$LOCATIONS" ]]           && echo "LOCATIONS : $LOCATIONS" || echo "'params.locations' Comma-separated list of locations to scan recursively for migrations."
-
-echo -e "${BOLD_GREEN}OK${RESET}\n"
+[[ ! -z "$COMMANDS" ]]            && echo "COMMANDS : $COMMANDS" || echo "'params.commands' Comma-separated list of flyway commands to execute."
 
 # --------------------------------
 
