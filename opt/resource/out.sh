@@ -81,6 +81,7 @@ cat >> flyway.conf <<- EOF
 flyway.url=$db_url
 flyway.user=$db_username
 flyway.password=$db_password
+flyway.cleanDisabled=true
 EOF
 
 [[ ! -z "$LOCATIONS" ]] && echo "flyway.locations=$LOCATIONS" >> flyway.conf
