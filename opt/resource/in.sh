@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# No-opt in script. Always return current version.
-
 set -e
 
 exec 3>&1 # make stdout available as fd 3 for the result
@@ -11,8 +9,6 @@ exec 1>&2 # redirect all output to stderr for logging
 
 request=$(mktemp --tmpdir cf-flyway-resource-check.XXXXXX)
 cat > $request <&0
-
-cat < $request | jq -r . | sed "s/\"password\":.*/\"password\": \"********************\"/" 
 
 # --------------------------------
 
@@ -45,7 +41,7 @@ output=$(jq -n "
         ref: \"$version\"
     },
     metadata: [
-        {name: \"metadata_updated_at\", value: $(echo $metadata | jq .metadata.updated_at)},
+        {name: \"metadata_url\", value: $(echo $metadata | jq .metadata.url)},
         {name: \"pcf_api\", value: \"$PCF_API\"},
         {name: \"pcf_org\", value: \"$PCF_ORG\"},
         {name: \"pcf_space\", value: \"$PCF_SPACE\"},

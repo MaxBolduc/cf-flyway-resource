@@ -1,7 +1,5 @@
 #!/bin/bash
 
-# No-opt out script. Always return new version.
-
 set -e
 
 exec 3>&1 # make stdout available as fd 3 for the result
@@ -11,6 +9,7 @@ exec 1>&2 # redirect all output to stderr for logging
 
 BOLD_GREEN="\e[32;1m"
 BOLD_CYAN="\e[36;1m"
+BLUE="\e[34m"
 RESET="\e[0m"
 
 DIR=${1-$(pwd)}
@@ -18,8 +17,6 @@ cd $DIR
 
 request=$(mktemp --tmpdir cf-flyway-resource-check.XXXXXX)
 cat > $request <&0
-
-cat < $request | jq -r . | sed "s/\"password\":.*/\"password\": \"********************\"/" 
 
 # --------------------------------
 
@@ -53,11 +50,9 @@ FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
 # login to cloud foundry
 cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
-echo -e '\n'
 
 # create service key if not exist
 cf create-service-key $PCF_SERVICE cf-flyway
-echo -e '\n'
 
 # create flyway.conf
 echo -e "Creating flyway configuration file for service instance ${BOLD_CYAN}${PCF_SERVICE}${RESET} using credentials from service key ${BOLD_CYAN}cf-flyway${RESET}..."
@@ -81,6 +76,7 @@ EOF
 [[ ! -z "$LOCATIONS" ]] && echo "flyway.locations=$LOCATIONS" >> flyway.conf
 
 # output flyway.conf (don't show password)
+echo ${BLUE}
 cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/" 
 echo -e "${BOLD_GREEN}OK${RESET}\n"
 
@@ -103,7 +99,7 @@ output=$(jq -n "
         ref: \"$version\"
     },
     metadata: [
-        {name: \"metadata_updated_at\", value: $(echo $metadata | jq .metadata.updated_at)},
+        {name: \"metadata_url\", value: $(echo $metadata | jq .metadata.url)},
         {name: \"pcf_api\", value: \"$PCF_API\"},
         {name: \"pcf_org\", value: \"$PCF_ORG\"},
         {name: \"pcf_space\", value: \"$PCF_SPACE\"},
