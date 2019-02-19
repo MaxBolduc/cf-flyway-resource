@@ -95,19 +95,21 @@ echo -e "${BOLD_GREEN}OK${RESET}\n"
 version=$(date -u +"%F %T.%3N (utc)")
 
 service_guid=$(cf service $PCF_SERVICE --guid)
+metadata=$(cf curl /v2/service_instances/$service_guid | jq .)
 
-metadata=$(cf curl /v2/service_instances/$service_guid | jq .metadata)
-
-output=$(echo $metadata | jq -r "
+output=$(jq -n "
 {
     version: {
         ref: \"$version\"
     },
     metadata: [
-        {name: \"guid\", value: .guid},
-        {name: \"url\", value: .url},
-        {name: \"created_at\", value: .created_at},
-        {name: \"updated_at\", value: .updated_at}
+        {name: \"metadata_updated_at\", value: $(echo $metadata | jq .metadata.updated_at)},
+        {name: \"pcf_api\", value: \"$PCF_API\"},
+        {name: \"pcf_org\", value: \"$PCF_ORG\"},
+        {name: \"pcf_space\", value: \"$PCF_SPACE\"},
+        {name: \"service\", value: $(cf curl $(echo $metadata | jq -r .entity.service_url) | jq .entity.label)},
+        {name: \"service_instance\", value: $(echo $metadata | jq .entity.name)},
+        {name: \"service_plan\", value: $(cf curl $(echo $metadata | jq -r .entity.service_plan_url) | jq .entity.name)}
     ]
 }")
 

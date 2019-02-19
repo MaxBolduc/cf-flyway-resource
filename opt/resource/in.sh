@@ -45,9 +45,6 @@ output=$(jq -n "
         ref: \"$version\"
     },
     metadata: [
-        {name: \"metadata_guid\", value: $(echo $metadata | jq .metadata.guid)},
-        {name: \"metadata_url\", value: $(echo $metadata | jq .metadata.url)},
-        {name: \"metadata_created_at\", value: $(echo $metadata | jq .metadata.created_at)},
         {name: \"metadata_updated_at\", value: $(echo $metadata | jq .metadata.updated_at)},
         {name: \"pcf_api\", value: \"$PCF_API\"},
         {name: \"pcf_org\", value: \"$PCF_ORG\"},
