@@ -56,29 +56,22 @@ echo -e "Creating flyway configuration file for service instance ${BOLD_CYAN}${P
 echo -e "Reference: ${BOLD_CYAN}https://flywaydb.org/documentation/configfiles${RESET}\n"
 
 # obtain service key credentials
-function get_jdbc_url() {
+credentials="$(cf service-key $PCF_SERVICE cf-flyway | grep -Pzoh '(?s)\{.*\}' | tr "\0" "\n")" # tr used to suppress "warning: command substitution: ignored null byte in input" 
 
-    local service_url=$(cf curl /v2/service_instances/$(cf service $1 --guid) | jq -r .entity.service_url)
-    local service_label=$(cf curl $service_url | jq -r .entity.label)
-    local credentials=$(cf service-key $1 cf-flyway | grep -Pzoh '(?s)\{.*\}')
-    local jdbc_url=""
+service_url=$(cf curl /v2/service_instances/$(cf service $PCF_SERVICE --guid) | jq -r .entity.service_url)
+service_label=$(cf curl $service_url | jq -r .entity.label)
 
-    if [[ $service_label == "a9s-postgresql94" ]] ; then
-        jdbc_url="jdbc:postgresql://$(echo $credentials | jq -r '.uri' | grep -Poh '(?<=@).*')"
-    elif [[ "$service_label" == "postgresql-9.5-odb" ]] ; then
-        jdbc_url=$(echo $credentials | jq -r .jdbc_uri)
-    elif [[ "$service_label" == "p-mysql" ]] ; then
-        jdbc_url=$(echo $credentials | jq -r .jdbcUrl | grep -Poh '[^?]*')
-    else
-        echo "Database service '$service_label' is not supported by this resource. However, adding support is trivial. Please file an issues and we'll add support."
-        return 1
-    fi
+if [[ $service_label == "a9s-postgresql94" ]] ; then
+    db_url="jdbc:postgresql://$(echo $credentials | jq -r '.uri' | grep -Poh '(?<=@).*')"
+elif [[ "$service_label" == "postgresql-9.5-odb" ]] ; then
+    db_url=$(echo $credentials | jq -r .jdbc_uri)
+elif [[ "$service_label" == "p-mysql" ]] ; then
+    db_url=$(echo $credentials | jq -r .jdbcUrl | grep -Poh '[^?]*')
+else
+    echo -e "Database service '$service_label' is not supported by this resource. However, adding support is trivial. Please file an issues and we'll add support.\n"
+    exit 1
+fi
 
-    echo $jdbc_url
-    return 0
-}
-
-db_url=$( get_jdbc_url $PCF_SERVICE )
 db_username=$(echo $credentials | jq -r '.username')
 db_password=$(echo $credentials | jq -r '.password')
 
