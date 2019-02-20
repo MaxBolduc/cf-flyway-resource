@@ -47,8 +47,6 @@ For a list of available tags, consult our [Docker Hub repo](https://hub.docker.c
     service: service-instance-name
 ```
 
----
-
 ## check
 
 ### version
@@ -56,8 +54,6 @@ For a list of available tags, consult our [Docker Hub repo](https://hub.docker.c
 The **check** script always returns the current version number, or generate an initial version if none was received.
 
 Version is expressed as datetime (utc).
-
----
 
 ## in
 
@@ -78,8 +74,6 @@ service_instance : service-instance-name
 service_label : a9s-postgresql94
 service_plan : postgresql-single-small
 ```
-
----
 
 ## out
 
@@ -104,24 +98,6 @@ The **out** script then execute flyway commands. If a command list parameters is
 * `flyway info`
 * `flyway migrate`
 * `flyway info`
-
-### version
-
-The **out** script always returns a new version version number.
-
-### metadata
-
-Read service information from the cf api to produce metadata.
-
-```yml
-metadata_url : /v2/service_instances/fe7f0258-5b6f-7b26-2cb2-79ad6f2a7454
-pcf_api : https://my.api.endpoint.com
-pcf_org : organization-name
-pcf_space : space-name
-service_instance : service-instance-name
-service_label : a9s-postgresql94
-service_plan : postgresql-single-small
-```
 
 ### params
 
@@ -222,4 +198,22 @@ jobs:
       commands: [info, undo, info]
       flyway_conf: |
         flyway.licenseKey=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+```
+
+### version
+
+The **out** script always returns a new version version number.
+
+### metadata
+
+Read service information from the cf api to produce metadata.
+
+```yml
+metadata_url : /v2/service_instances/fe7f0258-5b6f-7b26-2cb2-79ad6f2a7454
+pcf_api : https://my.api.endpoint.com
+pcf_org : organization-name
+pcf_space : space-name
+service_instance : service-instance-name
+service_label : a9s-postgresql94
+service_plan : postgresql-single-small
 ```
