@@ -57,7 +57,7 @@ cf create-service-key $PCF_SERVICE cf-flyway
 
 # create flyway.conf
 echo -e "Creating flyway configuration file for service instance ${BOLD_CYAN}${PCF_SERVICE}${RESET} using credentials from service key ${BOLD_CYAN}cf-flyway${RESET}..."
-echo -e "Reference: ${BOLD_CYAN}https://flywaydb.org/documentation/configfiles${RESET}\n"
+echo -e "Reference: ${BOLD_CYAN}https://flywaydb.org/documentation/configfiles${RESET}"
 
 # obtain service key credentials
 credentials="$(cf service-key $PCF_SERVICE cf-flyway | grep -Pzoh '(?s)\{.*\}' | tr "\0" "\n")" # tr used to suppress "warning: command substitution: ignored null byte in input" 
@@ -109,6 +109,8 @@ cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/"
 echo -e "${BOLD_GREEN}OK${RESET}\n"
 
 # execute flyway commands
+echo -e "Executing flyway command sequence ${BOLD_CYAN}[ $(echo ${COMMANDS} | jq -r 'map(.) | join(", ")') ]${RESET} on database service instance ${BOLD_CYAN}${PCF_SERVICE}${RESET}."
+
 echo $COMMANDS | jq -cr '.[]' | while read cmd; do
     flyway $cmd
 done
