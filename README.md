@@ -4,15 +4,15 @@ Version control for your database so you can migrate it with ease and confidence
 
 Features:
 
-* Seamless connection to CF database services.
-* Support all flyway cli commands. (Community Edition)
+* Seamless connection to Cloud Foundry database services.
+* Support all flyway cli commands.
 * Support flyway configuration file.
+* Support Community and Pro Edition
 * Output database service metadata.
 
 ## resource_types
 
 The image _cf-flyway-resource_ is built from [boxfuse/flyway](https://hub.docker.com/r/boxfuse/flyway). It also comes with the `cf_cli` and `jq` installed.
-
 
 ```yml
 - name: cf-flyway-resource
@@ -47,11 +47,25 @@ For a list of available tags, consult our [Docker Hub repo](https://hub.docker.c
     service: service-instance-name
 ```
 
+---
+
 ## check
+
+### version
 
 The **check** script always returns the current version number, or generate an initial version if none was received.
 
+Version is expressed as datetime (utc).
+
+---
+
 ## in
+
+### version
+
+The **in** script always returns the current version number. Therefore, the resources cannot be used as an input trigger.
+
+### metadata
 
 Read service information from the cf api to produce metadata.
 
@@ -65,20 +79,49 @@ service_label : a9s-postgresql94
 service_plan : postgresql-single-small
 ```
 
-The **in** script always returns the current version number. Therefore, the resources cannot be used as an input trigger.
+---
 
 ## out
 
 Migrate database schemas to CloudFoundry database service.
 
-The **out** script creates a service-key on the CloudFoundry database service. It then read the credentials of the service-key and generate a `flyway.config` file containing the CloudFoundry database service-key jdbcUrl, username and password. The generated `flyway.config` file will also have `flyway.cleanDisabled=true` set by default. Any other flyway configuration provided by the user is also appended to the generated `flyway.conf` file.
+The **out** script creates a service-key on the Cloud Foundry database service. It then reads the credentials of the service-key and generate a `flyway.config` file containing the CloudFoundry database service-key url, username and password.
 
-The **out** script then execute the commands reveived as parameters. If no command parameters are set, the script defaults to the following commands.
+The generated `flyway.config` file will also have `flyway.cleanDisabled=true` set by default.
+
+Any other flyway configuration provided by the user is also appended to the generated `flyway.conf` file. Note that the **out** script will always override the following config:
+
+```conf
+flyway.url={service-key jdbc:driver//url/database}  # Overwritten by Cloud Foundry service-key credentials
+flyway.user={service-key username}                  # Overwritten by Cloud Foundry service-key credentials
+flyway.password={service-key password}              # Overwritten by Cloud Foundry service-key credentials
+flyway.locations={params.locations}                 # Overwritten by locations parameter (required)
+flyway.cleanDisabled=true                           # Overwritten by clean_disabled parameter (optional, default=true)
+```
+
+The **out** script then execute flyway commands. If a command list parameters is set, they will be executed sequentialy. If no command list parameters are set, the script defaults to the following commands.
 
 * `flyway info`
 * `flyway migrate`
 * `flyway info`
 
+### version
+
+The **out** script always returns a new version version number.
+
+### metadata
+
+Read service information from the cf api to produce metadata.
+
+```yml
+metadata_url : /v2/service_instances/fe7f0258-5b6f-7b26-2cb2-79ad6f2a7454
+pcf_api : https://my.api.endpoint.com
+pcf_org : organization-name
+pcf_space : space-name
+service_instance : service-instance-name
+service_label : a9s-postgresql94
+service_plan : postgresql-single-small
+```
 
 ### params
 
@@ -88,7 +131,7 @@ The **out** script then execute the commands reveived as parameters. If no comma
   * Unprefixed locations or locations starting with `classpath:` point to a package on the classpath and may contain both SQL and Java-based migrations.
   * Locations starting with `filesystem:` point to a directory on the filesystem, may only contain SQL migrations and are only scanned recursively down non-hidden directories.
 * __commands__ _optional_
-  * List of commands to execute.
+  * List of commands to execute. (default: `[info, migrate, info]`)
   * Available commands are:
     * migrate  : Migrates the database
     * clean    : Drops all objects in the configured schemas
@@ -97,14 +140,19 @@ The **out** script then execute the commands reveived as parameters. If no comma
     * undo     : [pro] Undoes the most recently applied versioned migration
     * baseline : Baselines an existing database at the baselineVersion
     * repair   : Repairs the schema history table
+* __clean_disabled__ _optional_
+  * Whether to disabled clean. (default: `true`)
+  * This is especially useful for production environments where running clean can be quite a career limiting move.
 * __flyway_conf__ _optional_
   * one of:
     * path to an existing flyway.conf file.
     * inline flyway configuration.
-  * Please note that the following configuration will be overwritten by information from the CloudFoundry service-key.
+  * The following configuration will be overwritten by the **out** script
     * `flyway.url`
     * `flyway.user`
     * `flyway.password`
+    * `flyway.locations`
+    * `flyway.cleanDisabled`
 
 #### Exemples
 
@@ -143,9 +191,9 @@ jobs:
   - put: cf-flyway
     params:
       locations: filesystem:my-app-package/DB/Schema
-      flyway_conf: |-
+      flyway_conf: |
         flyway.schemas=dbo
-        flyway.licenseKey=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+        flyway.connectRetries=2
 ```
 
 4. Use a command sequence.
@@ -158,8 +206,20 @@ jobs:
   - put: cf-flyway
     params:
       locations: filesystem:my-app-package/DB/Schema
-      commands: [info, undo --pro, info] # optional, default to [info, migrate, info]
-      flyway_conf: |-
-        flyway.schemas=dbo
+      commands: [info, validate]
+```
+
+5. Use Flyway **Pro** feature.
+
+```yml
+jobs:
+- name: deploy
+  plan:
+  - get: my-app-package
+  - put: cf-flyway
+    params:
+      locations: filesystem:my-app-package/DB/Schema
+      commands: [info, undo, info]
+      flyway_conf: |
         flyway.licenseKey=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
 ```
