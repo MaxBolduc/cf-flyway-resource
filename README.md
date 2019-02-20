@@ -202,7 +202,7 @@ jobs:
 
 ### version
 
-The **out** script always returns a new version version number.
+The **out** script always returns a new version number.
 
 ### metadata
 
