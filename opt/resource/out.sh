@@ -42,7 +42,7 @@ CLEAN_DISABLED=$(jq -r '.params.clean_disabled // true' < $request)
 FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
 [[ -z "$LOCATIONS" ]]                   && echo "(required) 'params.locations' is missing." && valid_input=1
-[[ ${CLEAN_DISABLED,,} != "false" ]]    && CLEAN_DISABLED=true || CLEAN_DISABLED=false
+[[ ${CLEAN_DISABLED} != false ]]        && CLEAN_DISABLED=true
 [[ -f "$FLYWAY_CONF" ]]                 && FLYWAY_CONF=$(cat $FLYWAY_CONF)
 
 [[ valid_input -eq 1 ]]                 && exit 1
