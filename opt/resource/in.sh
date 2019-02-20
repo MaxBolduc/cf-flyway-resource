@@ -20,12 +20,14 @@ PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
 PCF_USERNAME=$(jq -r '.source.username // empty' < $request)
 PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 
-[[ -z "$PCF_API" ]]             && echo "(required) 'source.api' is missing."
-[[ -z "$PCF_ORG" ]]             && echo "(required) 'source.organization' is missing."
-[[ -z "$PCF_SPACE" ]]           && echo "(required) 'source.space' is missing."
-[[ -z "$PCF_SERVICE" ]]         && echo "(required) 'source.service' is missing."
-[[ -z "$PCF_USERNAME" ]]        && echo "(required) 'source.username' is missing."
-[[ -z "$PCF_PASSWORD" ]]        && echo "(required) 'source.password' is missing."
+[[ -z "$PCF_API" ]]                     && echo "(required) 'source.api' is missing." && valid_input=1
+[[ -z "$PCF_ORG" ]]                     && echo "(required) 'source.organization' is missing." && valid_input=1
+[[ -z "$PCF_SPACE" ]]                   && echo "(required) 'source.space' is missing." && valid_input=1
+[[ -z "$PCF_SERVICE" ]]                 && echo "(required) 'source.service' is missing." && valid_input=1
+[[ -z "$PCF_USERNAME" ]]                && echo "(required) 'source.username' is missing." && valid_input=1
+[[ -z "$PCF_PASSWORD" ]]                && echo "(required) 'source.password' is missing." && valid_input=1
+
+[[ valid_input -eq 1 ]]                 && exit 1
 
 # --------------------------------
 

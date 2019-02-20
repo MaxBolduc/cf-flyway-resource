@@ -20,7 +20,7 @@ cat > $request <&0
 
 # --------------------------------
 
-# required source
+# source
 PCF_API=$(jq -r '.source.api // empty' < $request)
 PCF_ORG=$(jq -r '.source.organization // empty' < $request)
 PCF_SPACE=$(jq -r '.source.space // empty' < $request)
@@ -28,20 +28,24 @@ PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
 PCF_USERNAME=$(jq -r '.source.username // empty' < $request)
 PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 
-[[ -z "$PCF_API" ]]             && echo "(required) 'source.api' is missing."
-[[ -z "$PCF_ORG" ]]             && echo "(required) 'source.organization' is missing."
-[[ -z "$PCF_SPACE" ]]           && echo "(required) 'source.space' is missing."
-[[ -z "$PCF_SERVICE" ]]         && echo "(required) 'source.service' is missing."
-[[ -z "$PCF_USERNAME" ]]        && echo "(required) 'source.username' is missing."
-[[ -z "$PCF_PASSWORD" ]]        && echo "(required) 'source.password' is missing."
+[[ -z "$PCF_API" ]]                     && echo "(required) 'source.api' is missing." && valid_input=1
+[[ -z "$PCF_ORG" ]]                     && echo "(required) 'source.organization' is missing." && valid_input=1
+[[ -z "$PCF_SPACE" ]]                   && echo "(required) 'source.space' is missing." && valid_input=1
+[[ -z "$PCF_SERVICE" ]]                 && echo "(required) 'source.service' is missing." && valid_input=1
+[[ -z "$PCF_USERNAME" ]]                && echo "(required) 'source.username' is missing." && valid_input=1
+[[ -z "$PCF_PASSWORD" ]]                && echo "(required) 'source.password' is missing." && valid_input=1
 
-# optional params
+# params
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
-COMMANDS=$(jq -r '.params.commands // empty' < $request)
+COMMANDS=$(jq -r '.params.commands // ["info", "migrate", "info"]' < $request)
+CLEAN_DISABLED=$(jq -r '.params.clean_disabled // true' < $request)
 FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
-[[ -z "$COMMANDS" ]]              && COMMANDS=$(jq -n '["info", "migrate", "info"]')
-[[ -f "$FLYWAY_CONF" ]]           && FLYWAY_CONF=$(cat $FLYWAY_CONF)
+[[ -z "$LOCATIONS" ]]                   && echo "(required) 'params.locations' is missing." && valid_input=1
+[[ ${CLEAN_DISABLED,,} != "false" ]]    && CLEAN_DISABLED=true || CLEAN_DISABLED=false
+[[ -f "$FLYWAY_CONF" ]]                 && FLYWAY_CONF=$(cat $FLYWAY_CONF)
+
+[[ valid_input -eq 1 ]]                 && exit 1
 
 # --------------------------------
 
@@ -61,6 +65,7 @@ credentials="$(cf service-key $PCF_SERVICE cf-flyway | grep -Pzoh '(?s)\{.*\}' |
 service_url=$(cf curl /v2/service_instances/$(cf service $PCF_SERVICE --guid) | jq -r .entity.service_url)
 service_label=$(cf curl $service_url | jq -r .entity.label)
 
+# detect service-key format and read database jdbc url.
 if [[ $service_label == "a9s-postgresql94" ]] ; then
     db_url="jdbc:postgresql://$(echo $credentials | jq -r '.uri' | grep -Poh '(?<=@).*')"
 elif [[ "$service_label" == "postgresql-9.5-odb" ]] ; then
@@ -75,16 +80,28 @@ fi
 db_username=$(echo $credentials | jq -r '.username')
 db_password=$(echo $credentials | jq -r '.password')
 
-echo "$FLYWAY_CONF" > flyway.conf 
+# create flyway.conf
+if [[ ! -z "$FLYWAY_CONF" ]] ; then
+    echo -e "# Copied from flyway_conf parameter.\n$FLYWAY_CONF" > flyway.conf
+else    
+    echo > flyway.conf
+fi
+
+sed -i /flyway\.url=.*/d ./flyway.conf
+sed -i /flyway\.user=.*/d ./flyway.conf
+sed -i /flyway\.password=.*/d ./flyway.conf
+sed -i /flyway\.locations=.*/d ./flyway.conf
+sed -i /flyway\.cleanDisabled=.*/d ./flyway.conf
 
 cat >> flyway.conf <<- EOF
+
+# Added by cf-flyway-resource
 flyway.url=$db_url
 flyway.user=$db_username
 flyway.password=$db_password
-flyway.cleanDisabled=true
+flyway.locations=$LOCATIONS
+flyway.cleanDisabled=$CLEAN_DISABLED
 EOF
-
-[[ ! -z "$LOCATIONS" ]] && echo "flyway.locations=$LOCATIONS" >> flyway.conf
 
 # output flyway.conf (don't show password)
 echo -e "${LIGHT_BLUE}"
