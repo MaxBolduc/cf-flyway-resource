@@ -1,6 +1,6 @@
 # cf-flyway-resource
 
-Version control for your database so you can migrate it with ease and confidence to Cloud Foundry database services with concourse-ci.
+Version control for your database so you can migrate it with ease and confidence to Cloud Foundry database services with [concourse-ci](https://concourse-ci.org/) and [Flyway](https://flywaydb.org/).
 
 Features:
 
