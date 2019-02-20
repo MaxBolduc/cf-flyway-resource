@@ -38,7 +38,7 @@ PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 # params
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
 COMMANDS=$(jq -r '.params.commands // ["info", "migrate", "info"]' < $request)
-CLEAN_DISABLED=$(jq -r '.params.clean_disabled // true' < $request)
+CLEAN_DISABLED=$(jq -r '.params.clean_disabled' < $request)
 FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
 [[ -z "$LOCATIONS" ]]                   && echo "(required) 'params.locations' is missing." && valid_input=1
