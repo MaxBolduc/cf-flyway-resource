@@ -51,11 +51,11 @@ FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 # --------------------------------
 
 # login to cloud foundry
-cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
+unbuffer cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
 echo ""
 
 # create service key if not exist
-cf create-service-key $PCF_SERVICE cf-flyway
+unbuffer cf create-service-key $PCF_SERVICE cf-flyway
 
 # create flyway.conf
 echo -e "Creating flyway configuration file for service instance ${BOLD_CYAN}${PCF_SERVICE}${RESET} using credentials from service key ${BOLD_CYAN}cf-flyway${RESET}..."

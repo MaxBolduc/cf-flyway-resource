@@ -5,7 +5,8 @@ RUN apt-get update \
     && apt-get install -y apt-utils \
     && apt-get install -y apt-transport-https \
     && apt-get install -y ca-certificates \
-    && apt-get install -y jq
+    && apt-get install -y jq \
+    && apt-get install -y expect
 
     # ...first add the Cloud Foundry Foundation public key and package repository to your system
 RUN wget -q -O - https://packages.cloudfoundry.org/debian/cli.cloudfoundry.org.key | apt-key add -
