@@ -51,7 +51,7 @@ FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 # --------------------------------
 
 # login to cloud foundry
-# cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
+cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
 echo ""
 
 # create service key if not exist
@@ -103,7 +103,6 @@ flyway.user=$db_username
 flyway.password=$db_password
 flyway.locations=$LOCATIONS
 flyway.cleanDisabled=$CLEAN_DISABLED
-flyway.url=jdbc:postgresql://localhost:55432/d39e948
 EOF
 
 # output flyway.conf (don't show password)
