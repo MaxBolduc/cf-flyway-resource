@@ -1,0 +1,40 @@
+resources:
+- name: cf-flyway-resource
+  type: git
+  source: 
+    uri: https://github.com/emerald-squad/cf-flyway-resource.git
+    branch: 'master'
+    ignore_paths:
+    - README.md
+    - VERSION
+    - ci/pipeline.yml
+
+- name: docker-hub
+  type: docker-image
+  source:
+    repository: emeraldsquad/cf-flyway-resource
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+
+- name: version
+  type: semver
+  source: 
+    driver: git
+    uri: git@github.com:emerald-squad/cf-flyway-resource.git
+    branch: 'master'
+    file: VERSION
+    private_key: ((github-key))
+
+jobs:
+- name: publish
+  plan:
+  - get: cf-flyway-resource
+    trigger: true
+  - put: version
+    params:
+      bump: patch
+  - put: docker-hub
+    params:
+      build: cf-flyway-resource
+      tag: version/version
+      tag_as_latest: true
