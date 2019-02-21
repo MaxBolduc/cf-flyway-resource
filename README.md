@@ -10,6 +10,11 @@ Features:
 * Support Community and Pro Edition
 * Output database service metadata.
 
+## Supported Tags
+
+The following tags are officially supported:
+* [`0.1.1`, (_Dockerfile_)](https://github.com/jpmorin/cf-flyway-resource/blob/v0.1.1/Dockerfile)
+
 ## resource_types
 
 The image _cf-flyway-resource_ is built from [boxfuse/flyway](https://hub.docker.com/r/boxfuse/flyway). It also comes with the `cf_cli` and `jq` installed.
@@ -21,11 +26,6 @@ The image _cf-flyway-resource_ is built from [boxfuse/flyway](https://hub.docker
     repository: emeraldsquad/cf-flyway-resource
     tag: 0.1.0
 ```
-
-## Supported Tags
-
-The following tags are officially supported:
-* [`0.1.1`, (_Dockerfile_)](https://github.com/jpmorin/cf-flyway-resource/blob/v0.1.1/Dockerfile)
 
 ## resource
 
