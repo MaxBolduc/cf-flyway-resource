@@ -10,7 +10,7 @@ exec 1>&2 # redirect all output to stderr for logging
 BOLD_GREEN="\e[32;1m"
 BOLD_CYAN="\e[36;1m"
 LIGHT_RED="\e[91m"
-LIGHT_CYAN="\e[96m"
+LIGHT_BLUE="\e[94m"
 RESET="\e[0m"
 
 DIR=${1-$(pwd)}
@@ -51,7 +51,8 @@ FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 # --------------------------------
 
 # login to cloud foundry
-cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
+# cf login -a $PCF_API -u $PCF_USERNAME -p $PCF_PASSWORD -o $PCF_ORG -s $PCF_SPACE
+echo ""
 
 # create service key if not exist
 cf create-service-key $PCF_SERVICE cf-flyway
@@ -102,27 +103,28 @@ flyway.user=$db_username
 flyway.password=$db_password
 flyway.locations=$LOCATIONS
 flyway.cleanDisabled=$CLEAN_DISABLED
+flyway.url=jdbc:postgresql://localhost:55432/d39e948
 EOF
 
 # output flyway.conf (don't show password)
-echo -e "${LIGHT_CYAN}"
-cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/" 
-echo -e "\n${BOLD_GREEN}OK${RESET}\n"
+echo -e "${LIGHT_BLUE}"
+cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/" && echo ""
+echo -e "${BOLD_GREEN}OK${RESET}\n"
 
 # execute flyway commands
 echo -e "Executing flyway command sequence ${BOLD_CYAN}[ $(echo ${COMMANDS} | jq -r 'map(.) | join(", ")') ]${RESET} on database service instance ${BOLD_CYAN}${PCF_SERVICE}${RESET}.\n"
 
 echo $COMMANDS | jq -cr '.[]' | while read cmd; do
-    echo -e "${BOLD_CYAN}$ flyway $cmd${RESET}"
+    echo -e "${BOLD_CYAN}$ flyway ${cmd}${RESET}"
     flyway $cmd
-    [[ $cmd != "info" ]] && echo "\n"
+    if [[ "$cmd" != "info" ]] ; then echo "" ; fi
 done
 echo -e "${BOLD_GREEN}OK${RESET}\n"
 
 # --------------------------------
 
+# create version with metadata output.
 version=$(date -u +"%F %T.%3N (utc)")
-
 service_guid=$(cf service $PCF_SERVICE --guid)
 metadata=$(cf curl /v2/service_instances/$service_guid | jq .)
 
