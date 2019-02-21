@@ -9,7 +9,8 @@ exec 1>&2 # redirect all output to stderr for logging
 
 BOLD_GREEN="\e[32;1m"
 BOLD_CYAN="\e[36;1m"
-LIGHT_BLUE="\e[94m"
+LIGHT_RED="\e[91m"
+LIGHT_CYAN="\e[96m"
 RESET="\e[0m"
 
 DIR=${1-$(pwd)}
@@ -28,12 +29,12 @@ PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
 PCF_USERNAME=$(jq -r '.source.username // empty' < $request)
 PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 
-[[ -z "$PCF_API" ]]                     && echo "(required) 'source.api' is missing." && valid_input=1
-[[ -z "$PCF_ORG" ]]                     && echo "(required) 'source.organization' is missing." && valid_input=1
-[[ -z "$PCF_SPACE" ]]                   && echo "(required) 'source.space' is missing." && valid_input=1
-[[ -z "$PCF_SERVICE" ]]                 && echo "(required) 'source.service' is missing." && valid_input=1
-[[ -z "$PCF_USERNAME" ]]                && echo "(required) 'source.username' is missing." && valid_input=1
-[[ -z "$PCF_PASSWORD" ]]                && echo "(required) 'source.password' is missing." && valid_input=1
+[[ -z "$PCF_API" ]]                     && echo "${LIGHT_RED}(required) 'source.api' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_ORG" ]]                     && echo "${LIGHT_RED}(required) 'source.organization' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_SPACE" ]]                   && echo "${LIGHT_RED}(required) 'source.space' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_SERVICE" ]]                 && echo "${LIGHT_RED}(required) 'source.service' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_USERNAME" ]]                && echo "${LIGHT_RED}(required) 'source.username' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_PASSWORD" ]]                && echo "${LIGHT_RED}(required) 'source.password' is missing.${RESET}" && valid_input=1
 
 # params
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
@@ -41,7 +42,7 @@ COMMANDS=$(jq -r '.params.commands // ["info", "migrate", "info"]' < $request)
 CLEAN_DISABLED=$(jq -r '.params.clean_disabled' < $request)
 FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
-[[ -z "$LOCATIONS" ]]                   && echo "(required) 'params.locations' is missing." && valid_input=1
+[[ -z "$LOCATIONS" ]]                   && echo "${LIGHT_RED}(required) 'params.locations' is missing." && valid_input=1
 [[ ${CLEAN_DISABLED} != false ]]        && CLEAN_DISABLED=true
 [[ -f "$FLYWAY_CONF" ]]                 && FLYWAY_CONF=$(cat $FLYWAY_CONF)
 
@@ -73,7 +74,7 @@ elif [[ "$service_label" == "postgresql-9.5-odb" ]] ; then
 elif [[ "$service_label" == "p-mysql" ]] ; then
     db_url=$(echo $credentials | jq -r .jdbcUrl | grep -Poh '[^?]*')
 else
-    echo -e "Database service '$service_label' is not supported by this resource. However, adding support is trivial. Please file an issues and we'll add support.\n"
+    echo -e "Database service ${BOLD_CYAN}'$service_label'${RESET} is not supported by this resource. However, adding support is trivial. Please file an issues and we'll add support.\n"
     exit 1
 fi
 
@@ -104,15 +105,17 @@ flyway.cleanDisabled=$CLEAN_DISABLED
 EOF
 
 # output flyway.conf (don't show password)
-echo -e "${LIGHT_BLUE}"
+echo -e "${LIGHT_CYAN}"
 cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/" 
-echo -e "${BOLD_GREEN}OK${RESET}\n"
+echo -e "\n${BOLD_GREEN}OK${RESET}\n"
 
 # execute flyway commands
-echo -e "Executing flyway command sequence ${BOLD_CYAN}[ $(echo ${COMMANDS} | jq -r 'map(.) | join(", ")') ]${RESET} on database service instance ${BOLD_CYAN}${PCF_SERVICE}${RESET}."
+echo -e "Executing flyway command sequence ${BOLD_CYAN}[ $(echo ${COMMANDS} | jq -r 'map(.) | join(", ")') ]${RESET} on database service instance ${BOLD_CYAN}${PCF_SERVICE}${RESET}.\n"
 
 echo $COMMANDS | jq -cr '.[]' | while read cmd; do
+    echo -e "${BOLD_CYAN}$ flyway $cmd${RESET}"
     flyway $cmd
+    [[ $cmd != "info" ]] && echo "\n"
 done
 echo -e "${BOLD_GREEN}OK${RESET}\n"
 
