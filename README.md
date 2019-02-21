@@ -79,9 +79,9 @@ service_plan : postgresql-single-small
 
 Migrate database schemas to CloudFoundry database service.
 
-The **out** script creates a service-key on the Cloud Foundry database service. It then reads the credentials of the service-key and generate a `flyway.config` file containing the CloudFoundry database service-key url, username and password.
+The **out** script creates a service-key on the Cloud Foundry database service. It then reads the credentials of the service-key and generate a `flyway.conf` file containing the CloudFoundry database service-key url, username and password.
 
-The generated `flyway.config` file will also have `flyway.cleanDisabled=true` set by default.
+The generated `flyway.conf` file will also have `flyway.cleanDisabled=true` set by default.
 
 Any other flyway configuration provided by the user is also appended to the generated `flyway.conf` file. Note that the **out** script will always override the following config:
 
