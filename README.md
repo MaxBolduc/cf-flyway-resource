@@ -22,7 +22,10 @@ The image _cf-flyway-resource_ is built from [boxfuse/flyway](https://hub.docker
     tag: 0.1.0
 ```
 
-For a list of available tags, consult our [Docker Hub repo](https://hub.docker.com/r/jpmorin/cf-flyway-resource/tags).
+## Supported Tags
+
+The following tags are officially supported:
+* [`0.1.1`, (_Dockerfile_)](https://github.com/jpmorin/cf-flyway-resource/blob/v0.1.1/Dockerfile)
 
 ## resource
 
