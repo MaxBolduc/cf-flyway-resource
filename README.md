@@ -13,7 +13,7 @@ Features:
 ## Supported Tags
 
 The following tags are officially supported:
-* [`0.1.1`, (_Dockerfile_)](https://github.com/jpmorin/cf-flyway-resource/blob/v0.1.1/Dockerfile)
+* [`0.1.1`, (_Dockerfile_)](https://github.com/emerald-squad/cf-flyway-resource/blob/v0.1.1/Dockerfile)
 
 ## resource_types
 
