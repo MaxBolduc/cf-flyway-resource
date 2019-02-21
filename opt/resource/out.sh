@@ -29,12 +29,12 @@ PCF_SERVICE=$(jq -r '.source.service // empty' < $request)
 PCF_USERNAME=$(jq -r '.source.username // empty' < $request)
 PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 
-[[ -z "$PCF_API" ]]                     && echo "${LIGHT_RED}(required) 'source.api' is missing.${RESET}" && valid_input=1
-[[ -z "$PCF_ORG" ]]                     && echo "${LIGHT_RED}(required) 'source.organization' is missing.${RESET}" && valid_input=1
-[[ -z "$PCF_SPACE" ]]                   && echo "${LIGHT_RED}(required) 'source.space' is missing.${RESET}" && valid_input=1
-[[ -z "$PCF_SERVICE" ]]                 && echo "${LIGHT_RED}(required) 'source.service' is missing.${RESET}" && valid_input=1
-[[ -z "$PCF_USERNAME" ]]                && echo "${LIGHT_RED}(required) 'source.username' is missing.${RESET}" && valid_input=1
-[[ -z "$PCF_PASSWORD" ]]                && echo "${LIGHT_RED}(required) 'source.password' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_API" ]]                     && echo -e "${LIGHT_RED}(required) 'source.api' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_ORG" ]]                     && echo -e "${LIGHT_RED}(required) 'source.organization' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_SPACE" ]]                   && echo -e "${LIGHT_RED}(required) 'source.space' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_SERVICE" ]]                 && echo -e "${LIGHT_RED}(required) 'source.service' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_USERNAME" ]]                && echo -e "${LIGHT_RED}(required) 'source.username' is missing.${RESET}" && valid_input=1
+[[ -z "$PCF_PASSWORD" ]]                && echo -e "${LIGHT_RED}(required) 'source.password' is missing.${RESET}" && valid_input=1
 
 # params
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
