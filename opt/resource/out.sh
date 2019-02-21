@@ -42,7 +42,7 @@ COMMANDS=$(jq -r '.params.commands // ["info", "migrate", "info"]' < $request)
 CLEAN_DISABLED=$(jq -r '.params.clean_disabled' < $request)
 FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
-[[ -z "$LOCATIONS" ]]                   && echo "${LIGHT_RED}(required) 'params.locations' is missing." && valid_input=1
+[[ -z "$LOCATIONS" ]]                   && echo -e "${LIGHT_RED}(required) 'params.locations' is missing." && valid_input=1
 [[ ${CLEAN_DISABLED} != false ]]        && CLEAN_DISABLED=true
 [[ -f "$FLYWAY_CONF" ]]                 && FLYWAY_CONF=$(cat $FLYWAY_CONF)
 
