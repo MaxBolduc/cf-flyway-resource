@@ -99,8 +99,8 @@ sed -i -e "/^\s*$/d" $flyway_temp
 
 if [[ -n "$(cat $flyway_temp)" ]] ; then
     echo -e "# Copied from flyway_conf parameter.\n$(cat $flyway_temp)" > flyway.conf
-else    
-    echo > flyway.conf
+else
+    touch flyway.conf
 fi
 
 cat >> flyway.conf <<- EOF
