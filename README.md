@@ -24,7 +24,7 @@ The image _cf-flyway-resource_ is built from [boxfuse/flyway](https://hub.docker
   type: docker-image
   source:
     repository: emeraldsquad/cf-flyway-resource
-    tag: 0.1.0
+    tag: 0.1.1
 ```
 
 ## resource
@@ -122,6 +122,9 @@ The **out** script then execute flyway commands. If a command list parameters is
 * __clean_disabled__ _optional_
   * Whether to disabled clean. (default: `true`)
   * This is especially useful for production environments where running clean can be quite a career limiting move.
+* __delete_service_key__ _optional_
+  * Whether to delete the service-key on the Cloud Foundry database service when done. (default: `false`)
+  * This is especially useful for on-demand qa environment.
 * __flyway_conf__ _optional_
   * one of:
     * path to an existing flyway.conf file.

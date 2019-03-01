@@ -40,10 +40,12 @@ PCF_PASSWORD=$(jq -r '.source.password // empty' < $request)
 LOCATIONS=$(jq -r '.params.locations // empty' < $request)
 COMMANDS=$(jq -r '.params.commands // ["info", "migrate", "info"]' < $request)
 CLEAN_DISABLED=$(jq -r '.params.clean_disabled' < $request)
+DELETE_SERVICE_KEY=$(jq -r '.params.delete_service_key' < $request)
 FLYWAY_CONF=$(jq -r '.params.flyway_conf // empty' < $request)
 
 [[ -z "$LOCATIONS" ]]                   && echo -e "${LIGHT_RED}(required) 'params.locations' is missing." && valid_input=1
 [[ ${CLEAN_DISABLED} != false ]]        && CLEAN_DISABLED=true
+[[ ${DELETE_SERVICE_KEY} != true ]]     && DELETE_SERVICE_KEY=false
 [[ -f "$FLYWAY_CONF" ]]                 && FLYWAY_CONF=$(cat $FLYWAY_CONF)
 
 [[ valid_input -eq 1 ]]                 && exit 1
@@ -119,6 +121,10 @@ echo $COMMANDS | jq -cr '.[]' | while read cmd; do
     if [[ "$cmd" != "info" ]] ; then echo "" ; fi
 done
 echo -e "${BOLD_GREEN}OK${RESET}\n"
+
+if [[ $DELETE_SERVICE_KEY == true ]] ; then
+    unbuffer cf delete-service-key $PCF_SERVICE cf-flyway -f
+fi 
 
 # --------------------------------
 
