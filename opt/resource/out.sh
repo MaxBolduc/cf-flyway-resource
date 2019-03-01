@@ -10,7 +10,7 @@ exec 1>&2 # redirect all output to stderr for logging
 BOLD_GREEN="\e[32;1m"
 BOLD_CYAN="\e[36;1m"
 LIGHT_RED="\e[91m"
-LIGHT_BLUE="\e[94m"
+LIGHT_CYAN="\e[96m"
 RESET="\e[0m"
 
 DIR=${1-$(pwd)}
@@ -106,7 +106,7 @@ flyway.cleanDisabled=$CLEAN_DISABLED
 EOF
 
 # output flyway.conf (don't show password)
-echo -e "${LIGHT_BLUE}"
+echo -e "${LIGHT_CYAN}"
 cat flyway.conf | sed "s/flyway\.password\=.*/flyway.password=************/" && echo ""
 echo -e "${BOLD_GREEN}OK${RESET}\n"
 
