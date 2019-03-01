@@ -85,20 +85,25 @@ db_username=$(echo $credentials | jq -r '.username')
 db_password=$(echo $credentials | jq -r '.password')
 
 # create flyway.conf
-if [[ ! -z "$FLYWAY_CONF" ]] ; then
-    echo -e "# Copied from flyway_conf parameter.\n$FLYWAY_CONF" > flyway.conf
+flyway_temp=$(mktemp --tmpdir flyway.conf.XXXXXX)
+echo -e "$FLYWAY_CONF" > $flyway_temp
+
+# clean flyway.conf temp file
+sed -i /flyway\.url=.*/d $flyway_temp
+sed -i /flyway\.user=.*/d $flyway_temp
+sed -i /flyway\.password=.*/d $flyway_temp
+sed -i /flyway\.locations=.*/d $flyway_temp
+sed -i /flyway\.cleanDisabled=.*/d $flyway_temp
+sed -i s/\#.*// $flyway_temp
+sed -i -e "/^\s*$/d" $flyway_temp
+
+if [[ -n "$(cat $flyway_temp)" ]] ; then
+    echo -e "# Copied from flyway_conf parameter.\n$(cat $flyway_temp)" > flyway.conf
 else    
     echo > flyway.conf
 fi
 
-sed -i /flyway\.url=.*/d ./flyway.conf
-sed -i /flyway\.user=.*/d ./flyway.conf
-sed -i /flyway\.password=.*/d ./flyway.conf
-sed -i /flyway\.locations=.*/d ./flyway.conf
-sed -i /flyway\.cleanDisabled=.*/d ./flyway.conf
-
 cat >> flyway.conf <<- EOF
-
 # Added by cf-flyway-resource
 flyway.url=$db_url
 flyway.user=$db_username
