@@ -1,40 +1,94 @@
 resources:
-- name: cf-flyway-resource
-  type: git
-  source: 
-    uri: https://github.com/emerald-squad/cf-flyway-resource.git
-    branch: 'master'
-    ignore_paths:
-    - README.md
-    - VERSION
-    - ci/pipeline.yml
-
-- name: docker-hub
-  type: docker-image
-  source:
-    repository: emeraldsquad/cf-flyway-resource
-    username: ((docker-hub-username))
-    password: ((docker-hub-password))
 
 - name: version
   type: semver
   source: 
     driver: git
-    uri: git@github.com:emerald-squad/cf-flyway-resource.git
+    uri: {{github-ssh}}
     branch: 'master'
     file: VERSION
     private_key: ((github-key))
 
+- name: repo
+  type: git
+  source: 
+    uri: {{github-https}}
+    branch: 'master'
+    ignore_paths:
+    - LICENCE
+    - README.md
+    - VERSION
+    - ci/**
+
+- name: docker-hub
+  type: docker-image
+  source:
+    repository: {{docker-image-repo}}
+    username: ((docker-hub-username))
+    password: ((docker-hub-password))
+
 jobs:
-- name: publish
+
+- name: prerelease-patch
   plan:
-  - get: cf-flyway-resource
-    trigger: true
+  - get: repo
+  - put: version-rc
+    resource: version
+    params:
+      pre: rc
+  - put: docker-hub
+    params:
+      build: repo
+      tag: version-rc/version
+      tag_as_latest: false
+
+- name: release-patch
+  plan:
+  - get: docker-hub
+    passed: [prerelease-patch]
+    trigger: false
+    params:
+      save: true
+  - put: version
+    params:
+      bump: final
+  - put: docker-hub
+    params:
+      load: docker-hub
+      tag: version/version
+      tag_as_latest: true
+  - put: bump-patch
+    resource: version
+    params:
+      bump: patch
+
+- name: bump-major
+  plan:
+  - put: version
+    params:
+      bump: major
+
+- name: bump-minor
+  plan:
+  - put: version
+    params:
+      bump: minor
+
+- name: bump-patch
+  plan:
   - put: version
     params:
       bump: patch
-  - put: docker-hub
-    params:
-      build: cf-flyway-resource
-      tag: version/version
-      tag_as_latest: true
+
+groups:
+
+- name: publish_image
+  jobs:
+    - prerelease-patch
+    - release-patch
+
+- name: bump-version
+  jobs:
+  - bump-major
+  - bump-minor
+  - bump-patch
