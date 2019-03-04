@@ -26,7 +26,7 @@ The image _cf-flyway-resource_ is built from [boxfuse/flyway](https://hub.docker
   type: docker-image
   source:
     repository: emeraldsquad/cf-flyway-resource
-    tag: 0.1.1
+    tag: 1.0.0
 ```
 
 ## resource
