@@ -13,7 +13,13 @@ Features:
 ## Supported Tags
 
 The following tags are officially supported:
+
+[![emeraldsquad/cf-flyway-resource](http://dockeri.co/image/emeraldsquad/cf-flyway-resource)](https://hub.docker.com/r/emeraldsquad/cf-flyway-resource/)
+
 * [`1.0.0`, (_Dockerfile_)](https://github.com/emerald-squad/cf-flyway-resource/blob/v1.0.0/Dockerfile)
+
+[![jpmorin/cf-flyway-resource](http://dockeri.co/image/jpmorin/cf-flyway-resource)](https://hub.docker.com/r/jpmorin/cf-flyway-resource/)
+
 * [`0.1.2`, (_Dockerfile_)](https://github.com/emerald-squad/cf-flyway-resource/blob/v0.1.2/Dockerfile)
 * [`0.1.1`, (_Dockerfile_)](https://github.com/emerald-squad/cf-flyway-resource/blob/v0.1.1/Dockerfile)
 
