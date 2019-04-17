@@ -82,8 +82,8 @@ pcf_api : https://my.api.endpoint.com
 pcf_org : organization-name
 pcf_space : space-name
 service_instance : service-instance-name
-service_label : a9s-postgresql94
-service_plan : postgresql-single-small
+service_label : pcf-db-service-name
+service_plan : pcf-db-service-plan
 ```
 
 ## out
@@ -228,6 +228,6 @@ pcf_api : https://my.api.endpoint.com
 pcf_org : organization-name
 pcf_space : space-name
 service_instance : service-instance-name
-service_label : a9s-postgresql94
-service_plan : postgresql-single-small
+service_label : pcf-db-service-name
+service_plan : pcf-db-service-plan
 ```
